@@ -1,94 +1,37 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{809F0D79-AEDC-4754-A213-FDBE97CCD6D6}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+	<TargetFrameworks>net8.0-windows;net6.0-windows</TargetFrameworks>    
     <RootNamespace>MonoGame.Framework.WpfInterop</RootNamespace>
     <AssemblyName>MonoGame.Framework.WpfInterop</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+
+	<PropertyGroup>
+		<Title>MonoGame.Framework.WpfInterop</Title>
+		<Description></Description>
+		<Company>MarcStan</Company>
+		<Product>MonoGame.Framework.WpfInterop</Product>
+		<Copyright>Copyright © MarcStan 2016</Copyright>
+		<AssemblyTitle>MonoGame.Framework.WpfInterop</AssemblyTitle>
+	</PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\MonoGame.Framework.WpfInterop.xml</DocumentationFile>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="MonoGame.Framework, Version=3.5.1.1679, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MonoGame.Framework.WindowsDX.3.5.1.1679\lib\net40\MonoGame.Framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="SharpDX">
-      <HintPath>..\packages\MonoGame.Framework.WindowsDX.3.5.1.1679\lib\net40\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct3D9">
-      <HintPath>..\packages\MonoGame.Framework.WindowsDX.3.5.1.1679\lib\net40\SharpDX.Direct3D9.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
+    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="D3D11Host.cs" />
-    <Compile Include="D3D11Image.cs" />
-    <Compile Include="D3D9.cs" />
-    <Compile Include="Input\WindowHelper.cs" />
-    <Compile Include="Input\WpfKeyboard.cs" />
-    <Compile Include="Input\WpfMouse.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WpfGame.cs" />
-    <Compile Include="WpfGraphicsDeviceService.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="MonoGame.Framework.WpfInterop.nuspec">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="readme.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
-    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
-      <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
-    </GetAssemblyIdentity>
-    <Exec Command="..\packages\NuGet.CommandLine.3.4.3\tools\NuGet.exe pack MonoGame.Framework.WpfInterop.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
-  </Target>
-  <Target Name="EnsureNuGetExeExist" BeforeTargets="AfterBuild">
-    <PropertyGroup>
-      <ErrorText>This project uses nuget.exe from the package NuGet.CommandLine. Most likely you updated the nuget package but haven't yet edited the .csproj file. Edit the .csproj file (at the very end). Could not find: {0}</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\NuGet.CommandLine.3.4.3\tools\NuGet.exe')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NuGet.CommandLine.3.4.3\tools\NuGet.exe'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

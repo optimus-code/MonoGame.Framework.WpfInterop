@@ -9,281 +9,274 @@ using System.Windows.Media;
 
 namespace MonoGame.Framework.WpfInterop
 {
-	/// <summary>
-	/// Host a Direct3D 11 scene.
-	/// </summary>
-	public class D3D11Host : Image, IDisposable
-	{
-		#region Fields
+    /// <summary>
+    /// Specifies the rendering mode of the D3D11Host.
+    /// </summary>
+    public enum RenderMode
+    {
+        Continuous,
+        Manual
+    }
 
-		private static readonly object _graphicsDeviceLock = new object();
+    /// <summary>
+    /// Host a Direct3D 11 scene.
+    /// </summary>
+    public class D3D11Host : Image, IDisposable
+    {
+        #region Fields
 
-		// Render timing:
-		private readonly Stopwatch _timer;
+        private static readonly object _graphicsDeviceLock = new object( );
+        private readonly Stopwatch _timer;
+        private static GraphicsDevice _graphicsDevice;
+        private static bool? _isInDesignMode;
+        private static int _referenceCount;
+        private D3D11Image _d3D11Image;
+        private bool _disposed;
+        private TimeSpan _lastRenderingTime;
+        private bool _loaded;
+        private RenderTarget2D _renderTarget;
+        private bool _resetBackBuffer;
+        private TimeSpan _timeSinceStart = TimeSpan.Zero;
+        private bool _isDirty = true;
 
-		// The Direct3D 11 device (shared by all D3D11Host elements):
-		private static GraphicsDevice _graphicsDevice;
-		private static bool? _isInDesignMode;
-		private static int _referenceCount;
+        #endregion
 
-		private D3D11Image _d3D11Image;
-		private bool _disposed;
-		private TimeSpan _lastRenderingTime;
-		private bool _loaded;
+        #region Constructors
 
-		// Image source:
-		private RenderTarget2D _renderTarget;
-		private bool _resetBackBuffer;
-		private TimeSpan _timeSinceStart = TimeSpan.Zero;
+        public D3D11Host( )
+        {
+            Stretch = Stretch.Fill;
+            _timer = new Stopwatch( );
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+        }
 
-		#endregion
+        ~D3D11Host( )
+        {
+            Dispose( false );
+        }
 
-		#region Constructors
+        #endregion
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="D3D11Host"/> class.
-		/// </summary>
-		public D3D11Host()
-		{
-			// defaulting to fill as that's what's needed in most cases
-			Stretch = Stretch.Fill;
+        #region Properties
 
-			_timer = new Stopwatch();
-			Loaded += OnLoaded;
-			Unloaded += OnUnloaded;
-		}
+        public static bool IsInDesignMode
+        {
+            get
+            {
+                if ( !_isInDesignMode.HasValue )
+                    _isInDesignMode = ( bool ) DependencyPropertyDescriptor.FromProperty( DesignerProperties.IsInDesignModeProperty, typeof( FrameworkElement ) ).Metadata.DefaultValue;
 
-		~D3D11Host()
-		{
-			Dispose(false);
-		}
+                return _isInDesignMode.Value;
+            }
+        }
 
-		#endregion
+        public GraphicsDevice GraphicsDevice => _graphicsDevice;
 
-		#region Properties
+        public GameServiceContainer Services { get; } = new GameServiceContainer( );
 
-		/// <summary>
-		/// Gets a value indicating whether the controls runs in the context of a designer (e.g.
-		/// Visual Studio Designer or Expression Blend).
-		/// </summary>
-		/// <value>
-		/// <see langword="true" /> if controls run in design mode; otherwise, 
-		/// <see langword="false" />.
-		/// </value>
-		public static bool IsInDesignMode
-		{
-			get
-			{
-				if (!_isInDesignMode.HasValue)
-					_isInDesignMode = (bool)DependencyPropertyDescriptor.FromProperty(DesignerProperties.IsInDesignModeProperty, typeof(FrameworkElement)).Metadata.DefaultValue;
+        /// <summary>
+        /// Gets or sets the rendering mode.
+        /// </summary>
+        public RenderMode RenderMode { get; set; } = RenderMode.Continuous;
 
-				return _isInDesignMode.Value;
-			}
-		}
+        #endregion
 
-		/// <summary>
-		/// Gets the graphics device.
-		/// </summary>
-		/// <value>The graphics device.</value>
-		public GraphicsDevice GraphicsDevice
-		{
-			get { return _graphicsDevice; }
-		}
+        #region Methods
 
-		/// <summary>
-		/// Default services collection.
-		/// </summary>
-		public GameServiceContainer Services { get; } = new GameServiceContainer();
+        public void Dispose( )
+        {
+            Dispose( true );
+        }
 
-		#endregion
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( _disposed )
+                return;
+            _disposed = true;
+        }
 
-		#region Methods
+        protected virtual void Initialize( ) { }
 
-		public void Dispose()
-		{
-			Dispose(true);
-		}
+        protected override void OnRenderSizeChanged( SizeChangedInfo sizeInfo )
+        {
+            _resetBackBuffer = true;
+            _isDirty = true; // Mark as dirty on resize
+            base.OnRenderSizeChanged( sizeInfo );
 
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-		}
+            if ( RenderMode == RenderMode.Manual )
+            {
+                RenderIfDirty( );
+            }
+        }
 
-		protected virtual void Initialize()
-		{
-		}
+        protected virtual void Render( GameTime time ) { }
 
-		/// <summary>
-		/// Raises the <see cref="FrameworkElement.SizeChanged" /> event, using the specified 
-		/// information as part of the eventual event data.
-		/// </summary>
-		/// <param name="sizeInfo">Details of the old and new size involved in the change.</param>
-		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-		{
-			_resetBackBuffer = true;
-			base.OnRenderSizeChanged(sizeInfo);
-		}
+        private static void InitializeGraphicsDevice( )
+        {
+            lock ( _graphicsDeviceLock )
+            {
+                _referenceCount++;
+                if ( _referenceCount == 1 )
+                {
+                    var presentationParameters = new PresentationParameters
+                    {
+                        DeviceWindowHandle = IntPtr.Zero,
+                    };
+                    _graphicsDevice = new GraphicsDevice( GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, presentationParameters );
+                }
+            }
+        }
 
-		protected virtual void Render(GameTime time)
-		{
-		}
+        private static void UninitializeGraphicsDevice( )
+        {
+            lock ( _graphicsDeviceLock )
+            {
+                _referenceCount--;
+                if ( _referenceCount == 0 )
+                {
+                    _graphicsDevice.Dispose( );
+                    _graphicsDevice = null;
+                }
+            }
+        }
 
-		private static void InitializeGraphicsDevice()
-		{
-			lock (_graphicsDeviceLock)
-			{
-				_referenceCount++;
-				if (_referenceCount == 1)
-				{
-					// Create Direct3D 11 device.
-					var presentationParameters = new PresentationParameters
-					{
-						// Do not associate graphics device with window.
-						DeviceWindowHandle = IntPtr.Zero,
-					};
-					_graphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, presentationParameters);
-				}
-			}
-		}
+        private void CreateBackBuffer( )
+        {
+            _d3D11Image.SetBackBuffer( null );
+            _renderTarget?.Dispose( );
+            int width = Math.Max( ( int ) ActualWidth, 1 );
+            int height = Math.Max( ( int ) ActualHeight, 1 );
+            _renderTarget = new RenderTarget2D( _graphicsDevice, width, height, false, SurfaceFormat.Bgr32, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents, true );
+            _d3D11Image.SetBackBuffer( _renderTarget );
+        }
 
-		private static void UninitializeGraphicsDevice()
-		{
-			lock (_graphicsDeviceLock)
-			{
-				_referenceCount--;
-				if (_referenceCount == 0)
-				{
-					_graphicsDevice.Dispose();
-					_graphicsDevice = null;
-				}
-			}
-		}
+        private void InitializeImageSource( )
+        {
+            _d3D11Image = new D3D11Image( );
+            _d3D11Image.IsFrontBufferAvailableChanged += OnIsFrontBufferAvailableChanged;
+            CreateBackBuffer( );
+            Source = _d3D11Image;
+        }
 
-		private void CreateBackBuffer()
-		{
-			_d3D11Image.SetBackBuffer(null);
-			if (_renderTarget != null)
-			{
-				_renderTarget.Dispose();
-				_renderTarget = null;
-			}
+        private void OnIsFrontBufferAvailableChanged( object sender, DependencyPropertyChangedEventArgs eventArgs )
+        {
+            if ( _d3D11Image.IsFrontBufferAvailable )
+            {
+                StartRendering( );
+                _resetBackBuffer = true;
+            }
+            else
+            {
+                StopRendering( );
+            }
+        }
 
-			int width = Math.Max((int)ActualWidth, 1);
-			int height = Math.Max((int)ActualHeight, 1);
-			_renderTarget = new RenderTarget2D(_graphicsDevice, width, height, false, SurfaceFormat.Bgr32, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents, true);
-			_d3D11Image.SetBackBuffer(_renderTarget);
-		}
+        private void OnLoaded( object sender, RoutedEventArgs eventArgs )
+        {
+            if ( IsInDesignMode || _loaded )
+                return;
 
-		private void InitializeImageSource()
-		{
-			_d3D11Image = new D3D11Image();
-			_d3D11Image.IsFrontBufferAvailableChanged += OnIsFrontBufferAvailableChanged;
-			CreateBackBuffer();
-			Source = _d3D11Image;
-		}
+            _loaded = true;
+            InitializeGraphicsDevice( );
+            InitializeImageSource( );
+            Initialize( );
+            StartRendering( );
+        }
 
-		private void OnIsFrontBufferAvailableChanged(object sender, DependencyPropertyChangedEventArgs eventArgs)
-		{
-			if (_d3D11Image.IsFrontBufferAvailable)
-			{
-				StartRendering();
-				_resetBackBuffer = true;
-			}
-			else
-			{
-				StopRendering();
-			}
-		}
+        private void OnRendering( object sender, EventArgs eventArgs )
+        {
+            if ( !_timer.IsRunning )
+                return;
 
-		private void OnLoaded(object sender, RoutedEventArgs eventArgs)
-		{
-			if (IsInDesignMode || _loaded)
-				return;
+            if ( _resetBackBuffer )
+                CreateBackBuffer( );
 
-			_loaded = true;
-			InitializeGraphicsDevice();
-			InitializeImageSource();
-			Initialize();
-			StartRendering();
-		}
+            var renderingEventArgs = ( RenderingEventArgs ) eventArgs;
+            if ( _lastRenderingTime != renderingEventArgs.RenderingTime || _resetBackBuffer )
+            {
+                _lastRenderingTime = renderingEventArgs.RenderingTime;
 
-		private void OnRendering(object sender, EventArgs eventArgs)
-		{
-			if (!_timer.IsRunning)
-				return;
+                // Only render if in continuous mode or dirty
+                if ( RenderMode == RenderMode.Continuous || _isDirty )
+                {
+                    GraphicsDevice.SetRenderTarget( _renderTarget );
+                    var diff = _timer.Elapsed - _timeSinceStart;
+                    _timeSinceStart = _timer.Elapsed;
+                    Render( new GameTime( _timer.Elapsed, diff ) );
+                    GraphicsDevice.Flush( );
+                    _isDirty = false; // Reset dirty flag after rendering
+                }
+            }
 
-			// Recreate back buffer if necessary.
-			if (_resetBackBuffer)
-				CreateBackBuffer();
+            _d3D11Image.Invalidate( );
+            _resetBackBuffer = false;
+        }
 
-			// CompositionTarget.Rendering event may be raised multiple times per frame
-			// (e.g. during window resizing).
-			var renderingEventArgs = (RenderingEventArgs)eventArgs;
-			if (_lastRenderingTime != renderingEventArgs.RenderingTime || _resetBackBuffer)
-			{
-				_lastRenderingTime = renderingEventArgs.RenderingTime;
+        private void OnUnloaded( object sender, RoutedEventArgs eventArgs )
+        {
+            if ( IsInDesignMode )
+                return;
 
-				GraphicsDevice.SetRenderTarget(_renderTarget);
-				var diff = _timer.Elapsed - _timeSinceStart;
-				_timeSinceStart = _timer.Elapsed;
-				Render(new GameTime(_timer.Elapsed, diff));
-				GraphicsDevice.Flush();
-			}
+            StopRendering( );
+            Dispose( );
+            UnitializeImageSource( );
+            UninitializeGraphicsDevice( );
+        }
 
-			_d3D11Image.Invalidate(); // Always invalidate D3DImage to reduce flickering
-									  // during window resizing.
+        private void StartRendering( )
+        {
+            if ( _timer.IsRunning )
+                return;
 
-			_resetBackBuffer = false;
-		}
+            CompositionTarget.Rendering += OnRendering;
+            _timer.Start( );
+        }
 
-		private void OnUnloaded(object sender, RoutedEventArgs eventArgs)
-		{
-			if (IsInDesignMode)
-				return;
+        private void StopRendering( )
+        {
+            if ( !_timer.IsRunning )
+                return;
 
-			StopRendering();
-			Dispose();
-			UnitializeImageSource();
-			UninitializeGraphicsDevice();
-		}
+            CompositionTarget.Rendering -= OnRendering;
+            _timer.Stop( );
+        }
 
-		private void StartRendering()
-		{
-			if (_timer.IsRunning)
-				return;
+        private void UnitializeImageSource( )
+        {
+            _d3D11Image.IsFrontBufferAvailableChanged -= OnIsFrontBufferAvailableChanged;
+            Source = null;
 
-			CompositionTarget.Rendering += OnRendering;
-			_timer.Start();
-		}
+            _d3D11Image?.Dispose( );
+            _d3D11Image = null;
+            _renderTarget?.Dispose( );
+            _renderTarget = null;
+        }
 
-		private void StopRendering()
-		{
-			if (!_timer.IsRunning)
-				return;
+        /// <summary>
+        /// Marks the control as dirty, meaning it needs to be re-rendered.
+        /// </summary>
+        public void MarkAsDirty( )
+        {
+            _isDirty = true;
 
-			CompositionTarget.Rendering -= OnRendering;
-			_timer.Stop();
-		}
+            if ( RenderMode == RenderMode.Manual )
+            {
+                RenderIfDirty( );
+            }
+        }
 
-		private void UnitializeImageSource()
-		{
-			_d3D11Image.IsFrontBufferAvailableChanged -= OnIsFrontBufferAvailableChanged;
-			Source = null;
+        /// <summary>
+        /// Forces a render if the control is dirty.
+        /// </summary>
+        private void RenderIfDirty( )
+        {
+            if ( _isDirty )
+            {
+                OnRendering( this, EventArgs.Empty );
+            }
+        }
 
-			if (_d3D11Image != null)
-			{
-				_d3D11Image.Dispose();
-				_d3D11Image = null;
-			}
-			if (_renderTarget != null)
-			{
-				_renderTarget.Dispose();
-				_renderTarget = null;
-			}
-		}
-
-		#endregion
-	}
+        #endregion
+    }
 }
