@@ -7,8 +7,21 @@
     <AssemblyName>MonoGame.WpfControl</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UseWPF>true</UseWPF>
+	  <LangVersion>Latest</LangVersion>
   </PropertyGroup>
-
+	<PropertyGroup>
+		<PackageId>MonoGame.WpfControl</PackageId>
+		<Version>3.8.1</Version>
+		<Authors>optimus-code</Authors>
+		<Product>MonoGame.WpfControl</Product>
+		<Description>WPF control for rendering MonoGame content.</Description>
+		<PackageTags>MonoGame;wpf;library;xna</PackageTags>
+		<RepositoryUrl>https://github.com/optimus-code/LcfSharp</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/optimus-code/MonoGame.WpfControl</PackageProjectUrl>
+		<PackageIconUrl>https://raw.githubusercontent.com/optimus-code/MonoGame.WpfControl/main/icon.png</PackageIconUrl>
+	</PropertyGroup>
 	<PropertyGroup>
 		<Title>MonoGame.WpfControl</Title>
 		<Description></Description>
