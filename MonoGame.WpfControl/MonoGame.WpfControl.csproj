@@ -29,6 +29,8 @@
 		<Product>MonoGame.WpfControl</Product>
 		<Copyright>Copyright © MarcStan 2016 © optimus-code 2024</Copyright>
 		<AssemblyTitle>MonoGame.WpfControl</AssemblyTitle>
+		<Nullable>annotations</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
