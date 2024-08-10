@@ -1,4 +1,4 @@
-# MonoGame WPF Interop
+# MonoGame.WpfControl
 
 This adds WPF support to MonoGame (tested with version 3.5.1.1679).
 
@@ -7,11 +7,11 @@ Note that you **need** MonoGame.Framework.WindowsDX (as this interop uses SharpD
 You can host as many MonoGame controls in Wpf as you want by using the WpfGame control. Note that they are however limited to 60 FPS (this is a WPF limit).
 
 ___
-## Available on NuGet  [![NuGet Status](http://img.shields.io/nuget/v/MonoGame.Framework.WpfInterop.svg?style=flat)](https://www.nuget.org/packages/MonoGame.Framework.WpfInterop/)
+## Available on NuGet  [![NuGet Status](http://img.shields.io/nuget/v/MonoGame.WpfControl.svg?style=flat)](https://www.nuget.org/packages/MonoGame.WpfControl/)
 
 https://nuget.org/packages/MonoGame.Framework.WpfInterop/
 
-    PM> Install-Package MonoGame.Framework.WpfInterop
+    PM> Install-Package MonoGame.WpfControl
    
 By adding the NuGet package to a project it is possible to host MonoGame inside WPF windows.
 
@@ -57,9 +57,8 @@ Now you can use it in any of your WPF forms:
 &lt;MyGame Width="800" Height="480" />
 
 
-# Roadmap
-
-* Properly implement GraphicsDeviceService (call all events when appropriate)
+# Credits
+Based on MonoGame.Framework.WpfInterop by MarcStan
 
 # Changelog
 
