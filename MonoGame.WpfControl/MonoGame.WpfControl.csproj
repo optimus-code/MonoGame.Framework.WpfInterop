@@ -16,7 +16,7 @@
 		<Product>MonoGame.WpfControl</Product>
 		<Description>WPF control for rendering MonoGame content.</Description>
 		<PackageTags>MonoGame;wpf;library;xna</PackageTags>
-		<RepositoryUrl>https://github.com/optimus-code/LcfSharp</RepositoryUrl>
+		<RepositoryUrl>https://github.com/optimus-code/MonoGame.WpfControl</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/optimus-code/MonoGame.WpfControl</PackageProjectUrl>
