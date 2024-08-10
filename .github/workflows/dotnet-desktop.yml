@@ -5,10 +5,14 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Disable Defender
+    - run: Set-MpPreference -DisableRealtimeMonitoring $true
+      shell: powershell
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -43,7 +47,7 @@ jobs:
       run: dotnet pack --configuration Release --no-build --output ${{ github.workspace }}/nupkg ${{ github.workspace }}/MonoGame.WpfControl/MonoGame.WpfControl.csproj
     
     - name: Publish NuGet package to GitHub Packages
-      run: dotnet nuget push MonoGame.WpfControl\MonoGame.WpfControl\nupkg\*.nupkg -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      run: dotnet nuget push nupkg\*.nupkg -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     - name: Publish NuGet package to nuget.org
-      run: dotnet nuget push MonoGame.WpfControl\MonoGame.WpfControl\nupkg\*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push nupkg\*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
