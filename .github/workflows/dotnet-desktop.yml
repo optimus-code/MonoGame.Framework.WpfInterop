@@ -35,12 +35,9 @@ jobs:
         
     - name: Restore dependencies
       run: dotnet restore ./MonoGame.WpfControl/MonoGame.WpfControl.csproj
-    
-    - name: Build
-      run: dotnet build --configuration Release --no-restore ./MonoGame.WpfControl/MonoGame.WpfControl.csproj
-    
+      
     - name: Pack NuGet package
-      run: dotnet pack --configuration Release --no-build --output ./nupkg ./MonoGame.WpfControl/MonoGame.WpfControl.csproj
+      run: dotnet pack --configuration Release --output ./nupkg ./MonoGame.WpfControl/MonoGame.WpfControl.csproj
     
     - name: Publish NuGet package to GitHub Packages
       env:
