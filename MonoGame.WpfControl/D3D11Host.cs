@@ -78,7 +78,7 @@ namespace MonoGame.WpfControl
         /// <summary>
         /// Gets or sets the rendering mode.
         /// </summary>
-        public RenderMode RenderMode { get; set; } = RenderMode.Continuous;
+        public virtual RenderMode RenderMode { get; set; } = RenderMode.Continuous;
 
         #endregion
 
@@ -186,31 +186,41 @@ namespace MonoGame.WpfControl
 
         private void OnRendering( object sender, EventArgs eventArgs )
         {
-            if ( !_timer.IsRunning )
-                return;
-
-            if ( _resetBackBuffer )
-                CreateBackBuffer( );
-
-            var renderingEventArgs = ( RenderingEventArgs ) eventArgs;
-            if ( _lastRenderingTime != renderingEventArgs.RenderingTime || _resetBackBuffer )
+            // Ensure the timer is running for continuous mode
+            if ( RenderMode == RenderMode.Continuous && !_timer.IsRunning )
             {
-                _lastRenderingTime = renderingEventArgs.RenderingTime;
-
-                // Only render if in continuous mode or dirty
-                if ( RenderMode == RenderMode.Continuous || _isDirty )
-                {
-                    GraphicsDevice.SetRenderTarget( _renderTarget );
-                    var diff = _timer.Elapsed - _timeSinceStart;
-                    _timeSinceStart = _timer.Elapsed;
-                    Render( new GameTime( _timer.Elapsed, diff ) );
-                    GraphicsDevice.Flush( );
-                    _isDirty = false; // Reset dirty flag after rendering
-                }
+                _timer.Start( );
+            }
+            else if ( RenderMode == RenderMode.Manual && _timer.IsRunning )
+            {
+                _timer.Stop( );
             }
 
+            // Check if rendering is necessary
+            if ( RenderMode == RenderMode.Manual && !_isDirty && !_resetBackBuffer )
+                return;
+
+            // Recreate back buffer if necessary
+            if ( _resetBackBuffer )
+            {
+                CreateBackBuffer( );
+                _resetBackBuffer = false;
+            }
+
+            // Only render if dirty or in continuous mode
+            if ( _isDirty || RenderMode == RenderMode.Continuous )
+            {
+                GraphicsDevice.SetRenderTarget( _renderTarget );
+                var diff = _timer.Elapsed - _timeSinceStart;
+                _timeSinceStart = _timer.Elapsed;
+                Render( new GameTime( _timer.Elapsed, diff ) );
+                GraphicsDevice.Flush( );
+
+                _isDirty = false; // Reset dirty flag after rendering
+            }
+
+            // Always invalidate the D3D11Image to update the display
             _d3D11Image.Invalidate( );
-            _resetBackBuffer = false;
         }
 
         private void OnUnloaded( object sender, RoutedEventArgs eventArgs )
@@ -226,20 +236,30 @@ namespace MonoGame.WpfControl
 
         private void StartRendering( )
         {
-            if ( _timer.IsRunning )
-                return;
-
-            CompositionTarget.Rendering += OnRendering;
-            _timer.Start( );
+            if ( RenderMode == RenderMode.Continuous )
+            {
+                if ( !_timer.IsRunning )
+                {
+                    CompositionTarget.Rendering += OnRendering;
+                    _timer.Start( );
+                }
+            }
+            else if ( RenderMode == RenderMode.Manual )
+            {
+                // Directly trigger rendering in manual mode
+                RenderIfDirty( );
+            }
         }
 
         private void StopRendering( )
         {
-            if ( !_timer.IsRunning )
-                return;
-
-            CompositionTarget.Rendering -= OnRendering;
-            _timer.Stop( );
+            if ( RenderMode == RenderMode.Continuous && _timer.IsRunning )
+            {
+                CompositionTarget.Rendering -= OnRendering;
+                _timer.Stop( );
+            }
+            // In manual mode, there's no need to stop the rendering since it's manually controlled.
+            // The timer is already not running in manual mode, so nothing additional is needed.
         }
 
         private void UnitializeImageSource( )
@@ -266,13 +286,11 @@ namespace MonoGame.WpfControl
             }
         }
 
-        /// <summary>
-        /// Forces a render if the control is dirty.
-        /// </summary>
         private void RenderIfDirty( )
         {
-            if ( _isDirty )
+            if ( _isDirty || _resetBackBuffer )
             {
+                // Manually invoke the rendering process
                 OnRendering( this, EventArgs.Empty );
             }
         }

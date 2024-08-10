@@ -11,7 +11,7 @@
   </PropertyGroup>
 	<PropertyGroup>
 		<PackageId>MonoGame.WpfControl</PackageId>
-		<Version>3.8.1</Version>
+		<Version>3.8.2</Version>
 		<Authors>optimus-code</Authors>
 		<Product>MonoGame.WpfControl</Product>
 		<Description>WPF control for rendering MonoGame content.</Description>
