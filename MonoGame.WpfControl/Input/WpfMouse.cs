@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace MonoGame.Framework.WpfInterop.Input
+namespace MonoGame.WpfControl.Input
 {
 	/// <summary>
 	/// Helper class that converts WPF mouse input to the XNA/MonoGame <see cref="_mouseState"/>.

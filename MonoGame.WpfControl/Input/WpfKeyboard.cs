@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-namespace MonoGame.Framework.WpfInterop.Input
+namespace MonoGame.WpfControl.Input
 {
 	/// <summary>
 	/// Helper class that accesses a native API to get the current keystate.

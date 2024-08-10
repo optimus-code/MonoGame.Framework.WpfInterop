@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Interop;
 using Texture = SharpDX.Direct3D9.Texture;
 
-namespace MonoGame.Framework.WpfInterop
+namespace MonoGame.WpfControl
 {
 	/// <summary>
 	/// Wraps the <see cref="D3DImage"/> to make it compatible with Direct3D 11.

@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using System;
 
-namespace MonoGame.Framework.WpfInterop
+namespace MonoGame.WpfControl
 {
 	/// <summary>
 	/// The replacement for <see cref="Game"/>. Unlike <see cref="Game"/> the <see cref="WpfGame"/> is a WPF control and can be hosted inside WPF windows.

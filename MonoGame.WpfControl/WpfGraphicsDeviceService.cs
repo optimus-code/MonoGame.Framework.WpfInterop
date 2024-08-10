@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.ComponentModel.Design;
 
-namespace MonoGame.Framework.WpfInterop
+namespace MonoGame.WpfControl
 {
 	/// <summary>
 	/// The <see cref="ContentManager"/> needs a <see cref="IGraphicsDeviceService"/> to be in the <see cref="IServiceContainer"/>. This class fulfills this purpose.

@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace MonoGame.Framework.WpfInterop
+namespace MonoGame.WpfControl
 {
     /// <summary>
     /// Specifies the rendering mode of the D3D11Host.

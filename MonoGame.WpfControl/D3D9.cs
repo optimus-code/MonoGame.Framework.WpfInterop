@@ -6,7 +6,7 @@ using System;
 using System.Runtime.InteropServices;
 using Texture = SharpDX.Direct3D9.Texture;
 
-namespace MonoGame.Framework.WpfInterop
+namespace MonoGame.WpfControl
 {
 	/// <summary>
 	/// Represents a Direct3D 9 device required for Direct3D 11 interoperability.

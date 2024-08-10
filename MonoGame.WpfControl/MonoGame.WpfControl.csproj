@@ -3,19 +3,19 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
 	<TargetFrameworks>net8.0-windows;net6.0-windows</TargetFrameworks>    
-    <RootNamespace>MonoGame.Framework.WpfInterop</RootNamespace>
-    <AssemblyName>MonoGame.Framework.WpfInterop</AssemblyName>
+    <RootNamespace>MonoGame.WpfControl</RootNamespace>
+    <AssemblyName>MonoGame.WpfControl</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
 	<PropertyGroup>
-		<Title>MonoGame.Framework.WpfInterop</Title>
+		<Title>MonoGame.WpfControl</Title>
 		<Description></Description>
-		<Company>MarcStan</Company>
-		<Product>MonoGame.Framework.WpfInterop</Product>
-		<Copyright>Copyright © MarcStan 2016</Copyright>
-		<AssemblyTitle>MonoGame.Framework.WpfInterop</AssemblyTitle>
+		<Company>optimus-code</Company>
+		<Product>MonoGame.WpfControl</Product>
+		<Copyright>Copyright © MarcStan 2016 © optimus-code 2024</Copyright>
+		<AssemblyTitle>MonoGame.WpfControl</AssemblyTitle>
 	</PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -27,7 +27,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>bin\Release\MonoGame.Framework.WpfInterop.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\MonoGame.WpfControl.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
