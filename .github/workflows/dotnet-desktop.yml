@@ -50,4 +50,5 @@ jobs:
       run: dotnet nuget push nupkg\*.nupkg -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     - name: Publish NuGet package to nuget.org
-      run: dotnet nuget push nupkg\*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push nupkg\*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+
