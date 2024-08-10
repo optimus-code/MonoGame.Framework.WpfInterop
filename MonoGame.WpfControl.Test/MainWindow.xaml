@@ -6,6 +6,29 @@
         xmlns:local="clr-namespace:MonoGame.WpfControl.Test"
         mc:Ignorable="d"
         Title="MainWindow" SizeToContent="WidthAndHeight">
+    <Window.Background>
+        <DrawingBrush TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="LightGray">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,16,16"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="Gray">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,8,8"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="Gray">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="8,8,8,8"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </Window.Background>
     <Grid>
         <local:WpfTest Width="640" Height="480" />
     </Grid>

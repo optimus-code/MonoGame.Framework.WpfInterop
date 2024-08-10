@@ -147,7 +147,7 @@ namespace MonoGame.WpfControl
             _renderTarget?.Dispose( );
             int width = Math.Max( ( int ) ActualWidth, 1 );
             int height = Math.Max( ( int ) ActualHeight, 1 );
-            _renderTarget = new RenderTarget2D( _graphicsDevice, width, height, false, SurfaceFormat.Bgr32, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents, true );
+            _renderTarget = new RenderTarget2D( _graphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents, true );
             _d3D11Image.SetBackBuffer( _renderTarget );
         }
 
