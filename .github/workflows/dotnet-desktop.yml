@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Disable Defender
-    - run: Set-MpPreference -DisableRealtimeMonitoring $true
+      run: Set-MpPreference -DisableRealtimeMonitoring $true
       shell: powershell
     
     - name: Setup .NET
